@@ -18,7 +18,10 @@ mod test_todo_controllers{
     use actix_clean_architecture::infrastructure::repositories::todo::TodoDieselRepository;
     use actix_clean_architecture::services::todo::TodoServiceImpl;
     use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
+    use serde_json::json;
     use actix_clean_architecture::api::controllers::todo_handler::{create_todo_handler, list_todos_handler};
+    use actix_clean_architecture::domain::models::todo::Todo;
+    use actix_clean_architecture::domain::repositories::repository::ResultPaging;
 
     pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
 
@@ -36,10 +39,8 @@ mod test_todo_controllers{
         );
         env::set_var(POSTGRESQL_DB_URI, connection_string);
 
-
         let pool = Arc::new(db_pool());
         pool.get().unwrap().run_pending_migrations(MIGRATIONS).unwrap();
-
 
         let container = Container::new();
         let todo_service = container.todo_service.clone();
@@ -58,19 +59,25 @@ mod test_todo_controllers{
         )
         .await;
 
-        let data = r#"
-        {
+        let request_body = json!({
             "title": "test todo",
             "description": "Test description"
-        }"#;
+        });
 
-        let request_payload: CreateTodoDTO = serde_json::from_str(data).unwrap();
-        let req = test::TestRequest::post().set_json(&request_payload).uri("/todos").to_request();
-        let resp = test::call_service(&app, req).await;
+        let resp = test::TestRequest::post().uri(&format!("/todos")).set_json(&request_body).send_request(&app).await;
         assert!(resp.status().is_success());
+        let todo: Todo = test::read_body_json(resp).await;
+        assert_eq!(todo.title, "test todo");
+        assert_eq!(todo.description, "Test description");
+
+        let resp = test::TestRequest::post().uri(&format!("/todos")).set_json(&request_body).send_request(&app).await;
+        assert!(resp.status().is_success());
+
 
         let req = test::TestRequest::get().uri("/todos").to_request();
         let resp = test::call_service(&app, req).await;
         assert!(resp.status().is_success());
+        let todos: ResultPaging<Todo> = test::read_body_json(resp).await;
+        assert_eq!(todos.items.len(), 2);
     }
 }

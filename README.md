@@ -1,5 +1,32 @@
 # Cookiecutter actix simple clean architecture
 
+
+## Getting started
+To start a new project, run the following command:
+```bash
+cookiecutter -c v1 https://github.com/coding-kitties/cookiecutter-flask-simple-clean-architecture
+```
+This will prompt you for some information about your project. The information
+you provide will be used to populate the files in the new project directory.
+
+You can then build the project locally.
+```bash
+cargo build
+```
+
+### Running the application locally
+To run the application locally, you need to have a Postgres database running.
+You can use the `run_postgres.sh` script in the `scripts` directory to run a Postgres container.
+```bash
+./scripts/run_postgres.sh
+```
+
+You can then run the application.
+```bash
+cargo run
+```
+
+
 ## Architecture 
 The application follows the Onion Architecture pattern.
 This architecture is a design pattern that organizes the codebase 
@@ -72,3 +99,16 @@ The application is structured with the following components:
     diesel migration run
     ```
 
+## Testing
+To run the tests, you can use the following command:
+```bash
+cargo test
+```
+To run the tests with error output you can run the following command:
+```bash
+cargo test -- --nocapture
+```
+or 
+```bash
+cargo test -- --show-output
+```

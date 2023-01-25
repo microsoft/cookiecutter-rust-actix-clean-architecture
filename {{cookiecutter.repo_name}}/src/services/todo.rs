@@ -38,17 +38,17 @@ impl TodoService for TodoServiceImpl {
             .map_err(|e| -> CommonError { e.into() })
     }
 
-    async fn get(&self, todo_id: i32) -> Result<Todo, CommonError> {
-        self.repository
-            .get(todo_id)
-            .await
-            .map_err(|e| -> CommonError { e.into() })
-    }
-
-    async fn delete(&self, todo_id: i32) -> Result<(), CommonError> {
-        self.repository
-            .delete(todo_id)
-            .await
-            .map_err(|e| -> CommonError { e.into() })
-    }
+    // async fn get(&self, todo_id: i32) -> Result<Todo, CommonError> {
+    //     self.repository
+    //         .get(todo_id)
+    //         .await
+    //         .map_err(|e| -> CommonError { e.into() })
+    // }
+    //
+    // async fn delete(&self, todo_id: i32) -> Result<(), CommonError> {
+    //     self.repository
+    //         .delete(todo_id)
+    //         .await
+    //         .map_err(|e| -> CommonError { e.into() })
+    // }
 }

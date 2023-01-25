@@ -23,6 +23,6 @@ impl QueryParams for TodoQueryParams {
 pub trait TodoRepository: Send + Sync {
     async fn create(&self, new_todo: &CreateTodo) -> RepositoryResult<Todo>;
     async fn list(&self, params: TodoQueryParams) -> RepositoryResult<ResultPaging<Todo>>;
-    async fn get(&self, todo_id: i32) -> RepositoryResult<Todo>;
-    async fn delete(&self, todo_id: i32) -> RepositoryResult<()>;
+    // async fn get(&self, todo_id: i32) -> RepositoryResult<Todo>;
+    // async fn delete(&self, todo_id: i32) -> RepositoryResult<()>;
 }

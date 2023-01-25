@@ -19,16 +19,16 @@ pub async fn list_todos_handler(
     Ok(web::Json(selection.into()))
 }
 
-pub async fn get_todo_handler(
-    todo_service: web::Data<dyn TodoService>, params: web::Path<i32>,
-) -> Result<web::Json<TodoDTO>, CommonError> {
-    let todo = todo_service.get(params.into_inner()).await?;
-    Ok(web::Json(todo.into()))
-}
-
-pub async fn delete_todo_handler(
-    todo_service: web::Data<dyn TodoService>, params: web::Path<i32>,
-) -> Result<T> {
-    todo_service.delete(params.into_inner()).await?;
-    Ok(())
-}
+// pub async fn get_todo_handler(
+//     todo_service: web::Data<dyn TodoService>, params: web::Path<i32>,
+// ) -> Result<web::Json<TodoDTO>, CommonError> {
+//     let todo = todo_service.get(params.into_inner()).await?;
+//     Ok(web::Json(todo.into()))
+// }
+//
+// pub async fn delete_todo_handler(
+//     todo_service: web::Data<dyn TodoService>, params: web::Path<i32>,
+// ) -> Result<T> {
+//     todo_service.delete(params.into_inner()).await?;
+//     Ok(())
+// }

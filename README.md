@@ -1,4 +1,4 @@
-# Actix clean architecture
+# Cookiecutter actix simple clean architecture
 
 ## Architecture 
 The application follows the Onion Architecture pattern.

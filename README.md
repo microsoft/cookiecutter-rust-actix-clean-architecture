@@ -4,7 +4,7 @@
 ## Getting started
 To start a new project, run the following command:
 ```bash
-cookiecutter -c v1 https://github.com/coding-kitties/cookiecutter-flask-simple-clean-architecture
+cookiecutter -c v1 https://github.com/coding-kitties/cookiecutter-actix-simple-clean-architecture
 ```
 This will prompt you for some information about your project. The information
 you provide will be used to populate the files in the new project directory.

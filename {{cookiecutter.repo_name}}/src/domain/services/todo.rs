@@ -9,7 +9,7 @@ use crate::domain::repositories::todo::TodoQueryParams;
 pub trait TodoService: Sync + Send {
     async fn create(&self, todo: CreateTodo) -> Result<Todo, CommonError>;
     async fn list(&self, params: TodoQueryParams) -> Result<ResultPaging<Todo>, CommonError>;
-    // async fn get(&self, todo_id: i32) -> Result<Todo, CommonError>;
-    // async fn delete(&self, todo_id: i32) -> Result<(), CommonError>;
+    async fn get(&self, todo_id: i32) -> Result<Todo, CommonError>;
+    async fn delete(&self, todo_id: i32) -> Result<(), CommonError>;
 }
 

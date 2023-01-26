@@ -19,7 +19,7 @@ mod test_todo_controllers{
     use actix_clean_architecture::services::todo::TodoServiceImpl;
     use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
     use serde_json::json;
-    use actix_clean_architecture::api::controllers::todo_handler::{create_todo_handler, list_todos_handler};
+    use actix_clean_architecture::api::controllers::todo_handler::{create_todo_handler, delete_todo_handler, get_todo_handler, list_todos_handler};
     use actix_clean_architecture::domain::models::todo::Todo;
     use actix_clean_architecture::domain::repositories::repository::ResultPaging;
 
@@ -55,6 +55,8 @@ mod test_todo_controllers{
                     web::scope("/todos")
                         .route("", web::get().to(list_todos_handler))
                         .route("", web::post().to(create_todo_handler))
+                        .route("/{id}", web::get().to(get_todo_handler))
+                        .route("/{id}", web::delete().to(delete_todo_handler))
                 )
         )
         .await;
@@ -70,14 +72,28 @@ mod test_todo_controllers{
         assert_eq!(todo.title, "test todo");
         assert_eq!(todo.description, "Test description");
 
+        let resp = test::TestRequest::get().uri(&format!("/todos/{}", todo.id)).send_request(&app).await;
+        assert!(resp.status().is_success());
+        let retrieved_todo: Todo = test::read_body_json(resp).await;
+        assert_eq!(todo.id, retrieved_todo.id);
+        assert_eq!(todo.title, retrieved_todo.title);
+
         let resp = test::TestRequest::post().uri(&format!("/todos")).set_json(&request_body).send_request(&app).await;
         assert!(resp.status().is_success());
-
 
         let req = test::TestRequest::get().uri("/todos").to_request();
         let resp = test::call_service(&app, req).await;
         assert!(resp.status().is_success());
         let todos: ResultPaging<Todo> = test::read_body_json(resp).await;
         assert_eq!(todos.items.len(), 2);
+
+        let resp = test::TestRequest::delete().uri(&format!("/todos/{}", todo.id)).send_request(&app).await;
+        assert!(resp.status().is_success());
+
+        let req = test::TestRequest::get().uri("/todos").to_request();
+        let resp = test::call_service(&app, req).await;
+        assert!(resp.status().is_success());
+        let todos: ResultPaging<Todo> = test::read_body_json(resp).await;
+        assert_eq!(todos.items.len(), 1);
     }
 }

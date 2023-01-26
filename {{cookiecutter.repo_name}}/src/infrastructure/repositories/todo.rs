@@ -52,27 +52,22 @@ impl TodoRepository for TodoDieselRepository {
         })
     }
 
-    // async fn get(&self, todo_id: i32) -> RepositoryResult<Todo> {
-    //     use crate::infrastructure::schema::todos::dsl::{id, todos};
-    //     let mut conn = self.pool.get().unwrap();
-    //     let id_filter = todo_id.to_string();
-    //     run(move || todos.filter(id.eq(id_filter)).first::<TodoDiesel>(&mut conn))
-    //         .await
-    //         .map_err(|v| DieselRepositoryError::from(v).into_inner())
-    //         .map(|v| -> Todo { v.into() })
-    // }
-    //
-    // async fn delete(&self, todo_id: i32) -> RepositoryResult<()> {
-    //     use crate::infrastructure::schema::todos::dsl::{id, todos};
-    //     let mut conn = self
-    //         .pool
-    //         .get()
-    //         .map_err(|v| DieselRepositoryError::from(v).into_inner())?;
-    //     let id_filter = todo_id.to_string();
-    //     run(move || diesel::delete(todos).filter(id.eq(id_filter))
-    //         .execute(&mut conn))
-    //         .await
-    //         .map_err(|v| DieselRepositoryError::from(v).into_inner())?;
-    //     Ok(())
-    // }
+    async fn get(&self, todo_id: i32) -> RepositoryResult<Todo> {
+        use crate::infrastructure::schema::todos::dsl::{id, todos};
+        let mut conn = self.pool.get().unwrap();
+        run(move || todos.filter(id.eq(todo_id)).first::<TodoDiesel>(&mut conn))
+            .await
+            .map_err(|v| DieselRepositoryError::from(v).into_inner())
+            .map(|v| -> Todo { v.into() })
+    }
+
+    async fn delete(&self, todo_id: i32) -> RepositoryResult<()> {
+        use crate::infrastructure::schema::todos::dsl::{id, todos};
+        let mut conn = self.pool.get().unwrap();
+        run(move || diesel::delete(todos).filter(id.eq(todo_id))
+            .execute(&mut conn))
+            .await
+            .map_err(|v| DieselRepositoryError::from(v).into_inner())?;
+        Ok(())
+    }
 }

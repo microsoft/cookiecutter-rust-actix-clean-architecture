@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use actix_web::{App, get, HttpResponse, HttpServer, post, Responder, web};
 use actix_web::web::route;
-use actix_clean_architecture::api::controllers::todo_handler::{create_todo_handler, list_todos_handler};
+use actix_clean_architecture::api::controllers::todo_handler::{create_todo_handler, delete_todo_handler, get_todo_handler, list_todos_handler};
 use actix_clean_architecture::container::Container;
 use actix_clean_architecture::domain::repositories::todo::TodoRepository;
 use actix_clean_architecture::domain::services::todo::TodoService;
@@ -24,6 +24,8 @@ async fn main() -> std::io::Result<()> {
                 web::scope("/todos")
                     .route("", web::post().to(create_todo_handler))
                     .route("", web::get().to(list_todos_handler))
+                    .route("/{id}", web::get().to(get_todo_handler))
+                    .route("/{id}", web::delete().to(delete_todo_handler))
             )
     })
     .bind(("127.0.0.1", 8080))?;

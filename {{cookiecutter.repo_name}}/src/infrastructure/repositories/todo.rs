@@ -1,8 +1,6 @@
-use std::process::id;
 use std::sync::Arc;
 use actix_threadpool::run;
 use async_trait::async_trait;
-use diesel::internal::operators_macro::FieldAliasMapper;
 use diesel::prelude::*;
 
 use crate::domain::models::todo::{CreateTodo, Todo};

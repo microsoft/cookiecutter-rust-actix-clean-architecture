@@ -3,4 +3,9 @@ CREATE TABLE todos (
   title VARCHAR NOT NULL,
   description TEXT NOT NULL,
   completed BOOLEAN NOT NULL DEFAULT FALSE
-)
+);
+
+CREATE TABLE service_contexts (
+  id SERIAL PRIMARY KEY,
+  maintenance BOOLEAN NOT NULL DEFAULT FALSE
+);

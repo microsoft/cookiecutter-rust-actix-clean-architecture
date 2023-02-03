@@ -4,6 +4,7 @@ use actix_web::body::MessageBody;
 use actix_web::dev::{ServiceFactory, ServiceRequest, ServiceResponse};
 use actix_web::middleware::Logger;
 use crate::api::controllers::todo_handler::{create_todo_handler, delete_todo_handler, get_todo_handler, list_todos_handler};
+use crate::api::middleware::{ServiceContextMaintenanceCheck};
 use crate::container::Container;
 
 pub fn create_app() -> App<
@@ -17,11 +18,13 @@ pub fn create_app() -> App<
 > {
     let container = Container::new();
     let todo_service = container.todo_service.clone();
-    let todo_service_data = web::Data::from(todo_service.clone());
-    let logger = Logger::default();
+    let service_context_service = container.service_context_service.clone();
+
     App::new()
-        .app_data(todo_service_data.clone())
-        .wrap(logger)
+        .app_data(web::Data::from(todo_service.clone()))
+        .app_data(web::Data::from(service_context_service.clone()))
+        .wrap(Logger::default())
+        .wrap(ServiceContextMaintenanceCheck)
         .service(
             web::scope("/todos")
                 .route("", web::post().to(create_todo_handler))

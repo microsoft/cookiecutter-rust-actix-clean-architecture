@@ -1,65 +1,59 @@
 use std::future::{ready, Ready};
-use actix_web::{
-    dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
-    Error,
-};
+
+use actix_web::{body::EitherBody, dev::{self, Service, ServiceRequest, ServiceResponse, Transform}, Error, HttpResponse, web};
 use futures_util::future::LocalBoxFuture;
+use log::info;
+use crate::domain::services::service_context::ServiceContextService;
 
-#[derive(Clone, Copy)]
-pub struct SayHi;
+pub struct ServiceContextMaintenanceCheck;
 
-impl SayHi {
-    pub fn new() -> SayHi {
-        SayHi {}
-    }
-}
-
-impl<S, B> Transform<S, ServiceRequest> for SayHi
+impl<S, B> Transform<S, ServiceRequest> for ServiceContextMaintenanceCheck
 where
     S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
     S::Future: 'static,
     B: 'static,
 {
-    type Response = ServiceResponse<B>;
+    type Response = ServiceResponse<EitherBody<B>>;
     type Error = Error;
+    type Transform = ServiceContextMaintenanceCheckMiddleware<S>;
     type InitError = ();
-    type Transform = SayHiMiddleware<S>;
     type Future = Ready<Result<Self::Transform, Self::InitError>>;
 
     fn new_transform(&self, service: S) -> Self::Future {
-        ready(Ok(SayHiMiddleware { service }))
+        ready(Ok(ServiceContextMaintenanceCheckMiddleware { service }))
     }
 }
-
-pub struct SayHiMiddleware<S> {
+pub struct ServiceContextMaintenanceCheckMiddleware<S> {
     service: S,
 }
 
-impl<S, B> Service<ServiceRequest> for SayHiMiddleware<S>
+impl<S, B> Service<ServiceRequest> for ServiceContextMaintenanceCheckMiddleware<S>
 where
     S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
     S::Future: 'static,
     B: 'static,
 {
-    type Response = ServiceResponse<B>;
+    type Response = ServiceResponse<EitherBody<B>>;
     type Error = Error;
     type Future = LocalBoxFuture<'static, Result<Self::Response, Self::Error>>;
 
-    forward_ready!(service);
+    dev::forward_ready!(service);
 
-    fn call(&self, req: ServiceRequest) -> Self::Future {
-        println!("Hi from start. You requested: {}", req.path());
-        println!("aigioegaioegaijoheagijaegiaegijeagjgeajogaeoaegojk");
-        println!("aigioegaioegaijoheagijaegiaegijeagjgeajogaeoaegojk");
-        println!("aigioegaioegaijoheagijaegiaegijeagjgeajogaeoaegojk");
+    fn call(&self, request: ServiceRequest) -> Self::Future {
+        let service_context_service =
+            request.app_data::<web::Data<dyn ServiceContextService>>().unwrap();
 
-        let fut = self.service.call(req);
+        if service_context_service.is_maintenance_active() {
+            info!("Service is in maintenance mode");
+            let (request, _pl) = request.into_parts();
+            let response = HttpResponse::ServiceUnavailable().finish().map_into_right_body();
+            return Box::pin(async { Ok(ServiceResponse::new(request, response)) });
+        }
 
+        let res = self.service.call(request);
         Box::pin(async move {
-            let res = fut.await?;
-
-            println!("Hi from response");
-            Ok(res)
+            // forwarded responses map to "left" body
+            res.await.map(ServiceResponse::map_into_left_body)
         })
     }
 }

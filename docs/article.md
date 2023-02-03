@@ -1,93 +1,98 @@
-# Actix Web Clean Architecture
+# Rust onion architecture with actix and diesel
+> All the source code of this article can be found [here](https://github.com/coding-kitties/cookiecutter-actix-simple-clean-architecture) 
 
-## Article
-This source code is related to the article [Microsoft CSE Dev blog: Rust Clean Architecture]().
+This article describes an onion architecture implementation with Rust using 
+actix and diesel. 
 
-## Overview
-This repository contains the source code of a clean architecture implementation
-(onion architecture) using rust Actix Web. The goal of this repository is to
-provide a clean architecture implementation that can be used as a template for 
-future projects. Also, it is a good example of how to use the onion architecture
-with rust, what are the benefits and how to use it and the limitations that 
-you would encounter with this approach (in a rust context).
+Onion Architecture is a software design pattern that organizes the codebase into 
+multiple layers. Each layer depends only on the layers inside of it and not on the layers outside of it,
+This creates a separation of concerns, which allows for a more maintainable and scalable codebase.
 
-## Requirements and installation
-* [Rust 1.51.0 or higher](https://www.rust-lang.org/tools/install)
-* [Docker](https://docs.docker.com/get-docker/)
+# Why onion architecture for a rust based web application?
+Onion architectures are commonly used by software engineering teams and in a wide amount of program languages. 
+It is therefore interesting to see how Rust functions in such an architecture. 
+Given that Rust is a new language compared to languages such as C#, java, C++, its is interesting to see how rust can 
+adapt a standard such as onion architecture. If rust is suitable for such an architecture it can be a decision driver for 
+new applications to adapt rust. 
 
-## Architecture deep dive
-In this section, we will go through the different layers of onion architecture
-and some of the decisions that were made. Also, we will go through some common questions to 
-help you understand the architecture better and resolve some of the questions that you might have.
+Rust is know for its speed, however, even if rust is fast compared to other languages, production ready web applications 
+typically use technologies such as a databases, caching or ORM's. These systems can slow a language down. However, taking into account
+that a standard production ready Rust web application would use these systems, we can still see that 
+Rust outperforms with a wide marging other languages.
 
-The full architecture explanation article can be found [here]()
+## Architecture Overview
+The onion architecture is a layered architecture that is based on the onion model. 
+Where each layer in the onion model is used to define the different layers of an application.
 
-### Architecture overview
-The architecture is based on the onion architecture. The onion architecture is a 
-layered architecture that is based on the onion model. Where each layer in the onion
-model is used to define the different layers of an application.
+For this rust implementation 4 layers are used. 
+* api (app) module: The outermost layer that contains the controllers and the endpoints definition, serialization and deserialization of the data, validation and error handling.
+* infrastructure: Layer that typically include database connections, external APIs calls, logging and configuration management.
+* services: Layer that contains the application's services, which encapsulate the core business logic and provide a higher-level abstraction for the application to interact with the domain entities.
+* domain: The innermost layer that contains the core business logic and entities of the application.
+
 
 Folder structure:
 ```
-├── Cargo.lock
-├── Cargo.toml -> Dependencies and project configuration
-├── README.md <-- You are here
-├── docs -> Documentation related to the project
+.
+├── migrations
+├── scripts
+│   └── run_postgres.sh # Run postgres in docker locally
 ├── src
-│   ├── domain # Domain layer
-│   │   ├── models # Domain models/entities
-│   │   │  ├── model_a.rs # Example of a domain model
-│   │   ├── repositories # Domain repositories interfaces/traits
-│   │   └── services # Domain services interfaces/traits
-│   ├── services # Services layer (implementations of business logic)
-│   │   │   ├── service_a.rs # Service A implementation
-│   ├── infrastructure # Infrastructure layer
-│   │   ├── db # Infrastructure database adapters and services
-│   │   ├── models # Concrete domain models/entities implementations (ORM, database models, concrete implemenations)
-│   │   ├── repositories # Infrastructure repositories implementations (ORM, database repositories, concrete implemenations)
-
+│   ├── api
+│   │   ├── controllers
+│   │   │   └── ...  # controllers for the api
+│   │   ├── dto # Data transfer objects  
+│   │   │   └── ... # Individual DTOs
+│   │   └── errors.py
+│   ├── infrastructure
+│   │   ├── services
+│   │   │   └── ...  # Services that use third party libraries or services (e.g. email service)
+│   │   ├── databases
+│   │   │   └── ...  # Database adapaters and initialization
+│   │   ├── repositories
+│   │   │   └── ...  # Repositories for interacting with the databases
+│   │   └── models
+│   │   │   └── ...  # Database models
+│   ├── domain
+│   │   ├── constants.py
+│   │   ├── exceptions.py
+│   │   ├── models
+│   │   │   └── ...  # Business logic models
+│   ├── services
+│   │    └── ...  # Services for interacting with the domain (business logic)
+│   ├── app.py
+│   ├── create_app.rs # app factory 
+│   ├── container.rs.py # Dependency container 
+│   └── logging.py
 ```
 
-#### Domain layer
+* migrations: Alembic's migration scripts are stored here.
+* scripts: contains the application's configuration settings.
 
-#### Service layer
+## Is rust suitable for onion architecture?
+The most problems you will face is the sharing your services 
+and repositories between the different layers. 
 
-#### Infrastructure layer
 
-#### Api/Application layer
-
-#### Best practices with onion architecture
-
-##### Dependency inversion principle in combination with dependency injection
-
-##### Data layer abstraction
+## Diesel adapter setup in the infrastructure layer
 ["The database is not the center. Its external"][onion-architecture]
 
-##### Domain models and business logic abstraction
-The _ is pure in the functional sense, i.e. it has no side-effects. This is where our business logic resides. It is exceptionally easy to test because its pure functions only take and return values. In our example, our _core_ is just a single function that takes 2 integers and adds them together. In the _core_, we don't think about IO at all.
+## Actix architecture adaptation
+Factory method where all dependencies are initialized
 
-##### Adapters and ports (where needed)
-
-### What is clean architecture and especially onion architecture?
-Similar to [Hexagonal Architecture][hexagonal-architecture] (also known as "Ports and Adapters") and [Uncle Bob's Clean Architecture][clean-architecture], the [Onion Architecture][onion-architecture] advocates a structure for our application that allows us to segregate core business logic.
-
-Imagine the concentric layers of an onion where you can only call inwards (i.e. from an outer layer to an inner layer). Let's see how this might work by starting at its core.
-
-
-### Why onion architecture?
-
-### Is rust a good fit for onion architecture?
-
-### How does actix web fit in onion architecture?
 Actix web was originally based on Actix and an actor framework. 
 Actors are objects which encapsulate state and behavior, they communicate exclusively by exchanging messages. Actix actors are implemented on top of Tokio. Multiple actors can run in same thread.
 
 Actix web still leans heavily on the actor model, therefore you will encounter some concepts that are related to the actor model. 
 For example, the `actix_web::web::Data` is a shared state between all the actors.
-
 In other languages, you would use dependency injection to inject the dependencies into the actors. In rust, you would use the `actix_web::web::Data` to share the state between the actors.
 
-### What are common pitfalls when using onion architecture in combination with actix web?
+Share all services through the app state.
+
+## What are common pitfalls with a rust onion architecture
+Let each layer have its own models.
+
+## Conclusion
 
 
 [clean-architecture]: https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html

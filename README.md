@@ -1,15 +1,3 @@
-# Project
-
-> This repo has been populated by an initial template to help get you started. Please
-> make sure to update the content to build a great experience for community-building.
-
-As the maintainer of this project, please make a few updates:
-
-- Improving this README.MD file to provide a great experience
-- Updating SUPPORT.MD with content about this project's support experience
-- Understanding the security reporting process in SECURITY.MD
-- Remove this section from the README
-
 # Cookiecutter actix simple clean architecture
 This is a reusable Rust Cookiecutter template. The project is based on Actix web in combination with Diesel ORM.
 

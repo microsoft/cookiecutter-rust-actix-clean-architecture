@@ -10,7 +10,7 @@ mod test_todo_controllers{
     use actix_clean_architecture::infrastructure::databases::postgresql::db_pool;
     use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
     use serde_json::json;
-    use actix_clean_architecture::create_app::create_app;
+    use actix_clean_architecture::{container::Container, create_app::create_app};
     use actix_clean_architecture::domain::models::todo::Todo;
     use actix_clean_architecture::domain::repositories::repository::ResultPaging;
 
@@ -31,10 +31,14 @@ mod test_todo_controllers{
 
         env::set_var(POSTGRESQL_DB_URI, connection_string);
 
+        {
         let pool = Arc::new(db_pool());
         pool.get().unwrap().run_pending_migrations(MIGRATIONS).unwrap();
+        }
 
-        let app = test::init_service(create_app()).await;
+        let container = Arc::new(Container::new());
+
+        let app = test::init_service(create_app(container)).await;
         let request_body = json!({
             "title": "test todo",
             "description": "Test description"

@@ -14,14 +14,15 @@ pub struct Container {
 
 impl Container {
     pub fn new() -> Self {
+        let pool = Arc::new(db_pool());
         let todo_repository: Arc<dyn TodoRepository> = Arc::new(
-            TodoDieselRepository::new(Arc::new(db_pool()))
+            TodoDieselRepository::new(pool.clone())
         );
         let todo_service = Arc::new(
             TodoServiceImpl { repository: todo_repository }
         );
         let service_context_service = Arc::new(
-            ServiceContextServiceImpl::new(Arc::new(db_pool()))
+            ServiceContextServiceImpl::new(pool.clone())
         );
         Container { todo_service, service_context_service }
     }

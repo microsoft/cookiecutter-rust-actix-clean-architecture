@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use actix_web::{App, web};
 use actix_web::{Error};
 use actix_web::body::MessageBody;
@@ -7,7 +8,7 @@ use crate::api::controllers::todo_handler::{create_todo_handler, delete_todo_han
 use crate::api::middleware::{ServiceContextMaintenanceCheck};
 use crate::container::Container;
 
-pub fn create_app() -> App<
+pub fn create_app(container: Arc<Container>) -> App<
     impl ServiceFactory<
         ServiceRequest,
         Response = ServiceResponse<impl MessageBody>,
@@ -16,7 +17,6 @@ pub fn create_app() -> App<
         Error = Error,
     >,
 > {
-    let container = Container::new();
     let todo_service = container.todo_service.clone();
     let service_context_service = container.service_context_service.clone();
 

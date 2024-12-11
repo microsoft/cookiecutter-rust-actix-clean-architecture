@@ -45,7 +45,7 @@ impl TodoRepository for TodoDieselRepository {
             .await
             .map_err(|v| DieselRepositoryError::from(v).into_inner())?;
         Ok(ResultPaging {
-            total: 0,
+            total: result.len() as i64,
             items: result.into_iter().map(|v| v.into()).collect()
         })
     }
